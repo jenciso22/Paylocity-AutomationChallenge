@@ -1,0 +1,1408 @@
+{
+	"info": {
+		"_postman_id": "6459b68f-584f-4d14-beb6-1b75b64d7b0d",
+		"name": "QA_BackendTesting_Paylocity",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25726061"
+	},
+	"item": [
+		{
+			"name": "Add Employee",
+			"item": [
+				{
+					"name": "Negative Scenarios",
+					"item": [
+						{
+							"name": "POST - Add Employee without Dependents",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains employee ID\", function () {\r",
+											"    pm.expect(jsonData).to.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.set(\"id\", jsonData.id);\r",
+											"\r",
+											"pm.test(\"Employee added without dependents\", function () {\r",
+											"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+											"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+											"    pm.expect(jsonData.dependants).to.eql(0)\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+											"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+											"\r",
+											"\r",
+											"pm.environment.set(\"firstName\", firstName);\r",
+											"pm.environment.set(\"lastName\", lastName);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\"\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Add Employee with negative dependents",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is returned for invalid dependents\", function () {\r",
+											"\r",
+											"    pm.expect(jsonData[0].memberNames).to.include(\"Dependants\");\r",
+											"    pm.expect(jsonData[0].errorMessage).to.eql(\"The field Dependants must be between 0 and 32.\");\r",
+											"\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+											"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+											"let dependents = Math.floor(Math.random() * 33);\r",
+											"\r",
+											"\r",
+											"\r",
+											"pm.environment.set(\"firstName\", firstName);\r",
+											"pm.environment.set(\"lastName\", lastName);\r",
+											"pm.environment.set(\"dependents\", dependents);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": -2\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Add Employee with missing fields",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verify error response for missing FirstName and LastName\", function () {\r",
+											"\r",
+											"    pm.expect(jsonData[0].memberNames).to.include(\"FirstName\");\r",
+											"    pm.expect(jsonData[0].errorMessage).to.eql(\"The FirstName field is required.\");\r",
+											"\r",
+											"    pm.expect(jsonData[1].memberNames).to.include(\"LastName\");\r",
+											"    pm.expect(jsonData[1].errorMessage).to.eql(\"The LastName field is required.\");    \r",
+											"\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"\"\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Add employee without Response body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Add employee using Invalid URL",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": {{dependents}}\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employ",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employ"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "POST - Add Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains employee ID\", function () {\r",
+									"    pm.expect(jsonData).to.have.property(\"id\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Employee added successfully\", function () {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"    pm.expect(jsonData.dependants).to.eql(pm.environment.get(\"dependents\"));\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"partitionKey\", jsonData.partitionKey);\r",
+									"pm.environment.set(\"id\", jsonData.id);\r",
+									"pm.environment.set(\"sortKey\", jsonData.sortKey);\r",
+									"pm.environment.set(\"salary\", jsonData.salary);\r",
+									"pm.environment.set(\"gross\", jsonData.gross);\r",
+									"pm.environment.set(\"benefitsCost\", jsonData.benefitsCost);\r",
+									"pm.environment.set(\"net\", jsonData.net);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"let dependents = Math.floor(Math.random() * 33);\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.environment.set(\"firstName\", firstName);\r",
+									"pm.environment.set(\"lastName\", lastName);\r",
+									"pm.environment.set(\"dependents\", dependents);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": {{dependents}}\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Review Employee Information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify correct employee information\", function () {\r",
+									"\r",
+									"      // Check partitionKey and sortKey using environment variables\r",
+									"    pm.expect(jsonData.partitionKey).to.eql(pm.environment.get(\"partitionKey\"));\r",
+									"    pm.expect(jsonData.sortKey).to.eql(pm.environment.get(\"sortKey\"));\r",
+									"\r",
+									"    // Check employee details using environment variables\r",
+									"    pm.expect(jsonData.id).to.eql(pm.environment.get(\"id\"));\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"    pm.expect(jsonData.dependants).to.eql(parseInt(pm.environment.get(\"dependents\")));\r",
+									"\r",
+									"    // Check salary and financial information using environment variables\r",
+									"    pm.expect(jsonData.salary).to.eql(parseInt(pm.environment.get(\"salary\")));\r",
+									"    pm.expect(jsonData.gross).to.eql(parseFloat(pm.environment.get(\"gross\")));\r",
+									"    pm.expect(jsonData.benefitsCost).to.eql(parseFloat(pm.environment.get(\"benefitsCost\")));\r",
+									"    pm.expect(jsonData.net).to.eql(parseFloat(pm.environment.get(\"net\")));\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees/{{id}}",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - New Employee is on the List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify new employee is in the list\", function () {\r",
+									"    const newEmployeeId = pm.environment.get(\"id\");\r",
+									"    \r",
+									"    // Find the employee in the list by matching the ID\r",
+									"    const employee = jsonData.find(emp => emp.id === newEmployeeId);\r",
+									"    \r",
+									"    // Verify that the employee is present in the list\r",
+									"    pm.expect(employee).to.not.be.undefined;\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Update Employee",
+			"item": [
+				{
+					"name": "Negative Scenarios",
+					"item": [
+						{
+							"name": "PUT - Update Employee with negative dependents",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+											"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+											"let dependents = Math.floor(Math.random() * 33);\r",
+											"\r",
+											"\r",
+											"\r",
+											"pm.environment.set(\"firstName\", firstName);\r",
+											"pm.environment.set(\"lastName\", lastName);\r",
+											"pm.environment.set(\"dependents\", dependents);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is returned for invalid dependents\", function () {\r",
+											"\r",
+											"    pm.expect(jsonData[0].memberNames).to.include(\"Dependants\");\r",
+											"    pm.expect(jsonData[0].errorMessage).to.eql(\"The field Dependants must be between 0 and 32.\");\r",
+											"\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": -4\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PUT - Update Employee using invalid URL",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": {{dependents}}\r\n}"
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/ployees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"ployees"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PUT - Update Employee without Response Body",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Basic {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+									"protocol": "https",
+									"host": [
+										"wmxrwq14uc",
+										"execute-api",
+										"us-east-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"Prod",
+										"api",
+										"employees"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PUT - Update Employee",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"let dependents = Math.floor(Math.random() * 33);\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.environment.set(\"firstName\", firstName);\r",
+									"pm.environment.set(\"lastName\", lastName);\r",
+									"pm.environment.set(\"dependents\", dependents);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"id\", jsonData.id);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Verify correct information\", function () {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"    pm.expect(jsonData.dependants).to.eql(pm.environment.get(\"dependents\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"dependants\": {{dependents}}\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Updated information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify employee information after update\", function () {\r",
+									"\r",
+									"    // Check employee details using environment variables\r",
+									"    pm.expect(jsonData.id).to.eql(pm.environment.get(\"id\"));\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"    pm.expect(jsonData.dependants).to.eql(parseInt(pm.environment.get(\"dependents\")));\r",
+									"\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees/{{id}}",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT - Update firstName and LastName",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"\r",
+									"pm.environment.set(\"firstName\", firstName);\r",
+									"pm.environment.set(\"lastName\", lastName);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"id\", jsonData.id);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Verify correct information\", function () {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\"\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Updated information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify employee information (firstName and lastName)\", function () {\r",
+									"\r",
+									"    // Check employee details using environment variables\r",
+									"    pm.expect(jsonData.id).to.eql(pm.environment.get(\"id\"));\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees/{{id}}",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT - Update firstName ONLY",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"let dependents = Math.floor(Math.random() * 33);\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.environment.set(\"firstName\", firstName);\r",
+									"pm.environment.set(\"lastName\", lastName);\r",
+									"pm.environment.set(\"dependents\", dependents);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"Verify correct information\", function () {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.environment.get(\"firstName\"));\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"firstName\": \"{{firstName}}\"\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT - Update lastName ONLY",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"let dependents = Math.floor(Math.random() * 33);\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"Verify correct information\", function () {\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.environment.get(\"lastName\"));\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"lastName\": \"{{lastName}}\"\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT - Update dependents ONLY",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let firstName = `John${Math.floor(Math.random() * 1000)}`;\r",
+									"let lastName = `Doe${Math.floor(Math.random() * 1000)}`;\r",
+									"let dependents = Math.floor(Math.random() * 33);\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"Verify correct information\", function () {\r",
+									"    pm.expect(jsonData.dependants).to.eql(pm.environment.get(\"dependents\"));\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"dependants\": {{dependents}}\r\n}"
+						},
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Delete Employee",
+			"item": [
+				{
+					"name": "DEL - Delete Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees/{{id}}",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Employee is not in the LIST",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify deleted employee is not in the list\", function () {\r",
+									"\r",
+									"    const deletedEmployeeId = pm.environment.get(\"employeeId\");\r",
+									"    const employee = jsonData.find(emp => emp.id === deletedEmployeeId);\r",
+									"    pm.expect(employee).to.be.undefined;\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api/employees",
+							"protocol": "https",
+							"host": [
+								"wmxrwq14uc",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"Prod",
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

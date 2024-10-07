@@ -1,0 +1,39 @@
+{
+  "name": "automation_paylocity",
+  "version": "1.0.0",
+  "description": "Automation for Paylocity",
+  "main": "index.js",
+  "scripts": {
+    "test:api": "newman run ./page_objects/testapi/QA_BackendTesting_Paylocity.postman_collection.json -e ./page_objects/testapi/Paylocityqa.postman_environment.json",
+
+    "test": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true",
+    "test:login": "testcafe chrome ./page_objects/tests/Login.test.js -s takeOnFails=true",
+    "test:addemployee": "testcafe chrome ./page_objects/tests/AddEmployee.test.js -s takeOnFails=true",
+    "test:updateemployee": "testcafe chrome ./page_objects/tests/UpdateEmployee.test.js -s takeOnFails=true",
+    "test:deleteemployee": "testcafe chrome ./page_objects/tests/deleteEmployee.test.js -s takeOnFails=true",    
+    "test:chrome": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true",
+    "test:safari": "testcafe safari ./page_objects/tests/ -s takeOnFails=true",
+    "test:firefox": "testcafe firefox ./page_objects/tests/ -s takeOnFails=true",
+
+    "test:report:json": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true --reporter json",
+    "test:report:xunit": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true --reporter xunit",
+    "test:report:list": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true --reporter list",
+    "test:report:html": "testcafe chrome ./page_objects/tests/ -s takeOnFails=true --skip-js-errors --reporter html:reports/html/POMReports.html",
+    "test:smoke:testing": "testcafe chrome ./page_objects/tests/ --test-meta type=smoke"
+  },
+  "author": "Jose Enciso",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "newman": "^6.2.1",
+    "prettier": "^3.3.3",
+    "testcafe": "^3.6.2",
+    "testcafe-reporter-html": "^1.4.6",
+    "testcafe-reporter-json": "^2.2.0",
+    "testcafe-reporter-list": "^2.2.0",
+    "testcafe-reporter-xunit": "^2.2.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.3"
+  }
+}
